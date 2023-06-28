@@ -52,6 +52,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api(compose.ui)
+                api(compose.foundation)
             }
         }
         val androidMain by getting {

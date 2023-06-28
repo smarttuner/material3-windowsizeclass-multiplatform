@@ -3,6 +3,7 @@
 
 package dev.chrisbanes.material3.windowsizeclass.sample
 
+import androidx.compose.foundation.isPlatformInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
@@ -22,6 +23,7 @@ import androidx.compose.ui.Modifier
 fun Sample() {
     Surface(Modifier.fillMaxSize()) {
         val windowSizeClass = calculateWindowSizeClass()
+        val isPlatformInDarkTheme = isPlatformInDarkTheme()
 
         var recompositionCount by remember { mutableStateOf(0) }
         SideEffect {
@@ -34,6 +36,8 @@ fun Sample() {
             Text(text = windowSizeClass.widthSizeClass.toString())
             Text(text = "height class")
             Text(text = windowSizeClass.heightSizeClass.toString())
+            Text(text = "Dark Theme?")
+            Text(text = isPlatformInDarkTheme.toString())
         }
     }
 }

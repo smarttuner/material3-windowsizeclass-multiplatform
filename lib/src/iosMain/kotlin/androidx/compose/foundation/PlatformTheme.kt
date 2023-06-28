@@ -1,7 +1,4 @@
-// Copyright 2023, Christopher Banes and the project contributors
-// SPDX-License-Identifier: Apache-2.0
-
-package androidx.compose.material3.windowsizeclass
+package androidx.compose.foundation
 
 import androidx.compose.foundation.utils.ObserverObject
 import androidx.compose.runtime.Composable
@@ -11,31 +8,30 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.interop.LocalUIViewController
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.dp
-import kotlinx.cinterop.useContents
 import platform.Foundation.NSKeyValueObservingOptionNew
 import platform.Foundation.addObserver
 import platform.Foundation.removeObserver
-import platform.UIKit.UIViewController
+import platform.UIKit.UIUserInterfaceStyle
 
-@ExperimentalMaterial3WindowSizeClassApi
+/**
+ * Gets the current system theme style
+ */
 @Composable
-actual fun calculateWindowSizeClass(): WindowSizeClass {
+actual fun isPlatformInDarkTheme(): Boolean {
     val uiViewController = LocalUIViewController.current
 
-    var windowSizeClass by remember(uiViewController) {
-        mutableStateOf(WindowSizeClass.calculateFromSize(uiViewController.getViewFrameSize()))
+    var isPlatformInDarkTheme by remember(uiViewController) {
+        mutableStateOf(false)
     }
 
     DisposableEffect(uiViewController) {
         val observer = ObserverObject {
-            windowSizeClass = WindowSizeClass.calculateFromSize(uiViewController.getViewFrameSize())
+            isPlatformInDarkTheme = uiViewController.traitCollection.userInterfaceStyle == UIUserInterfaceStyle.UIUserInterfaceStyleDark
         }
 
         uiViewController.view.layer.addObserver(
             observer = observer,
-            forKeyPath = "bounds",
+            forKeyPath = "effectiveUserInterfaceStyle",
             options = NSKeyValueObservingOptionNew,
             context = null,
         )
@@ -43,16 +39,11 @@ actual fun calculateWindowSizeClass(): WindowSizeClass {
         onDispose {
             uiViewController.view.layer.removeObserver(
                 observer = observer,
-                forKeyPath = "bounds",
+                forKeyPath = "effectiveUserInterfaceStyle",
             )
         }
     }
 
-    return windowSizeClass
-}
-
-private fun UIViewController.getViewFrameSize(): DpSize = view.frame().useContents {
-    // iOS returns density independent pixels, rather than raw pixels
-    DpSize(size.width.dp, size.height.dp)
+    return isPlatformInDarkTheme
 }
 
